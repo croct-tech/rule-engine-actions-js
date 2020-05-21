@@ -1,6 +1,5 @@
 import {PluginSdk} from '@croct/plug/plugin';
 import {ExternalEvent} from '@croct/plug/sdk/event';
-import {ArrayType, JsonType, MixedSchema, ObjectType, StringType, UnionType} from '@croct/plug/sdk/validation';
 import {Extension} from '@croct/plug-rule-engine/extension';
 import {Rule} from '@croct/plug-rule-engine/rule';
 import {ActionHandler, CustomAction} from './action/customAction';
@@ -19,8 +18,8 @@ type TrackingActionDefinition = {
     event: ExternalEvent,
 }
 
-type OperationActionDefinition = PatchDefinition & {
-    type: 'operation',
+type PatchActionDefinition = PatchDefinition & {
+    type: 'patch',
 }
 
 type StyleActionDefinition = StyleDefinition & {
@@ -30,7 +29,7 @@ type StyleActionDefinition = StyleDefinition & {
 export type ActionDefinition =
     CustomActionDefinition
     | TrackingActionDefinition
-    | OperationActionDefinition
+    | PatchActionDefinition
     | StyleActionDefinition;
 
 type EventTrigger = {
@@ -53,7 +52,6 @@ export type ConditionalAction = {
 export type ActionProperty = string|string[];
 
 export type ActionMap = {[key: string]: ConditionalAction | ConditionalAction[]};
-
 
 export default class ActionExtension implements Extension {
     private readonly sdk: PluginSdk;
@@ -116,7 +114,7 @@ export default class ActionExtension implements Extension {
 
     private createAction(definition: ActionDefinition): Action {
         switch (definition.type) {
-            case 'operation':
+            case 'patch':
                 return new PatchAction(definition);
 
             case 'tracking':
