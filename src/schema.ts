@@ -64,9 +64,15 @@ const patchSourceSchema = new ObjectType({
 const patchActionSchema = new ObjectType({
     required: ['event'],
     properties: {
-        subject: new StringType({enumeration: ['user', 'session']}),
-        attribute: new StringType({format: 'pointer'}),
-        operation: new StringType({enumeration: ['set', 'add', 'combine']}),
+        subject: new StringType({
+            enumeration: ['user', 'session'],
+        }),
+        attribute: new StringType({
+            format: 'pointer',
+        }),
+        operation: new StringType({
+            enumeration: ['set', 'add', 'combine'],
+        }),
         source: patchSourceSchema,
     },
 });

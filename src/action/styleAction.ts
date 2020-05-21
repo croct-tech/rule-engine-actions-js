@@ -1,10 +1,12 @@
 import {Action} from './index';
 
-export type StyleDefinition = {
+type ClassOperation = {
+    operation: 'add-class' | 'remove-class',
     element: string,
-    operation: 'add' | 'remove',
     className: string | string[],
-};
+}
+
+export type StyleDefinition = {element: string} & ClassOperation;
 
 export class StyleAction implements Action {
     private readonly definition: StyleDefinition;
@@ -14,10 +16,18 @@ export class StyleAction implements Action {
     }
 
     public apply(): void {
-        const {element: selector, className} = this.definition;
-        const classes = Array.isArray(className) ? className : [className];
-        const elements: NodeListOf<HTMLElement> = window.document.querySelectorAll(selector);
+        const elements: NodeListOf<HTMLElement> = window.document.querySelectorAll(this.definition.element);
 
-        elements.forEach(element => element.classList[this.definition.operation](...classes));
+        switch (this.definition.operation) {
+            case 'add-class':
+            case 'remove-class': {
+                const {className} = this.definition;
+                const classes = Array.isArray(className) ? className : [className];
+                const method = this.definition.operation === 'add-class' ? 'add' : 'remove';
+
+                elements.forEach(element => element.classList[method](...classes));
+                break;
+            }
+        }
     }
 }
