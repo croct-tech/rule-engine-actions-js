@@ -5,7 +5,7 @@ import {Action} from './index';
 type InputSource = {
     type: 'input',
     element: string,
-    validation?: RegExp,
+    validation?: {(value: string): boolean} | RegExp,
     normalization?: {(value: string): JsonValue},
 }
 
@@ -70,13 +70,29 @@ export default class PatchAction implements Action {
                     return undefined;
                 }
 
-                const value = this.getElementValue(element);
+                let value: JsonValue = this.getElementValue(element);
 
-                if (value === null || source.validation?.test(value) === false) {
+                if (value === null) {
                     return undefined;
                 }
 
-                return source.normalization ? source.normalization(value) : value;
+                const {validation, normalization} = source;
+
+                if (validation !== undefined) {
+                    const validator = validation instanceof RegExp
+                        ? validation.test.bind(validation)
+                        : validation;
+
+                    if (!validator(value)) {
+                        return undefined;
+                    }
+                }
+
+                if (normalization !== undefined) {
+                    value = normalization(value);
+                }
+
+                return value;
             }
         }
     }

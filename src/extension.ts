@@ -1,4 +1,5 @@
 import {PluginSdk} from '@croct/plug/plugin';
+import {describe} from '@croct/plug/sdk/validation';
 import {ExternalEvent} from '@croct/plug/sdk/event';
 import {Extension} from '@croct/plug-rule-engine/extension';
 import {Rule} from '@croct/plug-rule-engine/rule';
@@ -8,21 +9,21 @@ import StyleAction, {StyleDefinition} from './action/styleAction';
 import TrackingAction from './action/trackingAction';
 import {Action} from './action';
 
-type CustomActionDefinition = {
+export type CustomActionDefinition = {
     type: 'custom',
     handler: ActionHandler | ActionHandler[],
 }
 
-type TrackingActionDefinition = {
+export type TrackingActionDefinition = {
     type: 'tracking',
     event: ExternalEvent,
 }
 
-type PatchActionDefinition = PatchDefinition & {
+export type PatchActionDefinition = PatchDefinition & {
     type: 'patch',
 }
 
-type StyleActionDefinition = StyleDefinition & {
+export type StyleActionDefinition = StyleDefinition & {
     type: 'style',
 }
 
@@ -44,14 +45,14 @@ type MatchTrigger = {
 
 export type ActionTrigger = MatchTrigger | EventTrigger;
 
-export type ConditionalAction = {
+export type ActionCondition = {
     trigger: ActionTrigger,
     action: ActionDefinition,
 }
 
 export type ActionProperty = string|string[];
 
-export type ActionMap = {[key: string]: ConditionalAction | ConditionalAction[]};
+export type ActionMap = {[key: string]: ActionCondition | ActionCondition[]};
 
 export default class ActionExtension implements Extension {
     private readonly sdk: PluginSdk;
@@ -72,6 +73,12 @@ export default class ActionExtension implements Extension {
 
         const pending = [];
         for (const actionName of Array.isArray(action) ? action : [action]) {
+            if (typeof actionName !== 'string') {
+                logger.error(`Expected an action name but got value of type "${describe(action)}" in rule "${name}".`);
+
+                continue;
+            }
+
             const current = this.actions[actionName];
 
             if (current === undefined) {
@@ -86,7 +93,7 @@ export default class ActionExtension implements Extension {
         await Promise.all(pending);
     }
 
-    private applyAll(actions: ConditionalAction[]): Promise<void>[] {
+    private applyAll(actions: ActionCondition[]): Promise<void>[] {
         const pending = [];
         for (const {trigger, action} of actions) {
             const promise = this.trigger(trigger, this.createAction(action));
@@ -114,21 +121,31 @@ export default class ActionExtension implements Extension {
 
     private createAction(definition: ActionDefinition): Action {
         switch (definition.type) {
-            case 'patch':
-                return new PatchAction(definition);
+            case 'patch': {
+                const patchDefinition = {...definition};
+                delete patchDefinition.type;
 
-            case 'tracking':
+                return new PatchAction(patchDefinition);
+            }
+
+            case 'tracking': {
                 return new TrackingAction(definition.event);
+            }
 
-            case 'style':
-                return new StyleAction(definition);
+            case 'style': {
+                const styleDefinition = {...definition};
+                delete styleDefinition.type;
 
-            case 'custom':
+                return new StyleAction(styleDefinition);
+            }
+
+            case 'custom': {
                 return new CustomAction(
                     Array.isArray(definition.handler)
                         ? definition.handler
                         : [definition.handler],
                 );
+            }
         }
     }
 }
