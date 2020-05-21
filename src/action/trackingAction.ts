@@ -2,7 +2,7 @@ import {ExternalEvent} from '@croct/plug/sdk/event';
 import {PluginSdk} from '@croct/plug/plugin';
 import {Action} from './index';
 
-export class TrackingAction implements Action {
+export default class TrackingAction implements Action {
     private readonly event: ExternalEvent;
 
     public constructor(event: ExternalEvent) {

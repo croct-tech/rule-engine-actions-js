@@ -2,10 +2,10 @@ import {PluginSdk} from '@croct/plug/plugin';
 import {ExternalEvent} from '@croct/plug/sdk/event';
 import {Extension} from '@croct/plug-rule-engine/extension';
 import {Rule} from '@croct/plug-rule-engine/rule';
-import {ActionHandler, CustomAction} from './action/customAction';
-import {PatchAction, PatchDefinition} from './action/patchAction';
-import {StyleAction, StyleDefinition} from './action/styleAction';
-import {TrackingAction} from './action/trackingAction';
+import CustomAction, {ActionHandler} from './action/customAction';
+import PatchAction, {PatchDefinition} from './action/patchAction';
+import StyleAction, {StyleDefinition} from './action/styleAction';
+import TrackingAction from './action/trackingAction';
 import {Action} from './action';
 
 type CustomActionDefinition = {

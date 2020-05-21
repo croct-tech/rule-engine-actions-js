@@ -8,7 +8,7 @@ type ClassOperation = {
 
 export type StyleDefinition = {element: string} & ClassOperation;
 
-export class StyleAction implements Action {
+export default class StyleAction implements Action {
     private readonly definition: StyleDefinition;
 
     public constructor(definition: StyleDefinition) {

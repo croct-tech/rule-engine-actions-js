@@ -21,7 +21,7 @@ export type PatchDefinition = {
     source: ProvidedSource | InputSource,
 }
 
-export class PatchAction implements Action {
+export default class PatchAction implements Action {
     private readonly definition: PatchDefinition;
 
     public constructor(definition: PatchDefinition) {

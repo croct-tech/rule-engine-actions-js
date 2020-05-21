@@ -7,7 +7,7 @@ function isAction(value: any): value is Action {
     return typeof value === 'object' && typeof value.apply === 'function';
 }
 
-export class CustomAction implements Action {
+export default class CustomAction implements Action {
     private readonly actions: ActionHandler[];
 
     public constructor(actions: ActionHandler[]) {
