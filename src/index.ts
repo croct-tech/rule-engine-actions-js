@@ -1,6 +1,7 @@
 import engine from '@croct/plug-rule-engine/plugin';
 import {PluginArguments} from '@croct/plug/plugin';
-import ActionExtension, {ActionMap, ActionProperty, actionMapSchema} from './extension';
+import ActionExtension, {ActionMap, ActionProperty} from './extension';
+import {actionMapSchema} from './schema';
 
 declare module '@croct/plug-rule-engine/plugin' {
     export interface ExtensionConfigurations {

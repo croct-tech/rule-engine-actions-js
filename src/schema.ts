@@ -1,23 +1,42 @@
-import {ArrayType, JsonType, MixedSchema, ObjectType, StringType, UnionType} from '@croct/plug/sdk/validation';
+import {
+    ArrayType,
+    JsonType,
+    MixedSchema,
+    ObjectType,
+    StringType,
+    UnionType,
+    FunctionType,
+} from '@croct/plug/sdk/validation';
 
 /**
- * Action schemas
+ * Action definition schemas
  */
-const customActionSchema = new ObjectType({
+const actionHandlerSchema = new UnionType(
+    new FunctionType(),
+    new ObjectType({
+        required: ['apply'],
+        additionalProperties: true,
+        properties: {
+            apply: new FunctionType(),
+        },
+    }),
+);
+
+const customActionDefinitionSchema = new ObjectType({
     required: ['handler'],
     properties: {
-        handler: new UnionType(new ArrayType(), new ObjectType()),
+        handler: actionHandlerSchema,
     },
 });
 
-const trackingActionSchema = new ObjectType({
+const trackingActionDefinitionSchema = new ObjectType({
     required: ['event'],
     properties: {
         event: new ObjectType(),
     },
 });
 
-const styleActionSchema = new ObjectType({
+const styleActionDefinitionSchema = new ObjectType({
     required: ['element'],
     properties: {
         element: new StringType({minLength: 1}),
@@ -61,7 +80,7 @@ const patchSourceSchema = new ObjectType({
     },
 });
 
-const patchActionSchema = new ObjectType({
+const patchActionDefinitionSchema = new ObjectType({
     required: ['event'],
     properties: {
         subject: new StringType({
@@ -77,7 +96,7 @@ const patchActionSchema = new ObjectType({
     },
 });
 
-const actionSchema = new ObjectType({
+const actionDefinitionSchema = new ObjectType({
     required: ['type'],
     additionalProperties: true,
     properties: {
@@ -88,10 +107,10 @@ const actionSchema = new ObjectType({
     subtypes: {
         discriminator: 'type',
         schemas: {
-            custom: customActionSchema,
-            tracking: trackingActionSchema,
-            patch: patchActionSchema,
-            style: styleActionSchema,
+            custom: customActionDefinitionSchema,
+            tracking: trackingActionDefinitionSchema,
+            patch: patchActionDefinitionSchema,
+            style: styleActionDefinitionSchema,
         },
     },
 });
@@ -131,7 +150,7 @@ const actionConditionSchema = new ObjectType({
     required: ['trigger', 'action'],
     properties: {
         trigger: triggerSchema,
-        action: actionSchema,
+        action: actionDefinitionSchema,
     },
 });
 
