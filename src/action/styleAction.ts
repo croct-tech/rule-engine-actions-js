@@ -1,12 +1,10 @@
 import {Action} from './index';
 
-type ClassOperation = {
+export type StyleDefinition = {
     operation: 'add-class' | 'remove-class',
     element: string,
     className: string | string[],
-}
-
-export type StyleDefinition = {element: string} & ClassOperation;
+};
 
 export default class StyleAction implements Action {
     private readonly definition: StyleDefinition;

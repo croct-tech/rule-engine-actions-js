@@ -1,10 +1,10 @@
 import {
     ArrayType,
     JsonType,
-    MixedSchema,
     ObjectType,
     StringType,
     UnionType,
+    JsonObjectType,
     FunctionType,
 } from '@croct/plug/sdk/validation';
 
@@ -25,22 +25,27 @@ const actionHandlerSchema = new UnionType(
 const customActionDefinitionSchema = new ObjectType({
     required: ['handler'],
     properties: {
-        handler: actionHandlerSchema,
+        handler: new UnionType(
+            actionHandlerSchema,
+            new ArrayType({
+                items: actionHandlerSchema,
+            }),
+        ),
     },
 });
 
 const trackingActionDefinitionSchema = new ObjectType({
     required: ['event'],
     properties: {
-        event: new ObjectType(),
+        event: new JsonObjectType(),
     },
 });
 
 const styleActionDefinitionSchema = new ObjectType({
-    required: ['element'],
+    required: ['element', 'operation', 'className'],
     properties: {
         element: new StringType({minLength: 1}),
-        operation: new StringType({enumeration: ['add', 'remove']}),
+        operation: new StringType({enumeration: ['add-class', 'remove-class']}),
         className: new UnionType(
             new StringType(),
             new ArrayType({
@@ -61,8 +66,13 @@ const inputSourceSchema = new ObjectType({
     required: ['element'],
     properties: {
         element: new StringType({minLength: 1}),
-        validation: new ObjectType(),
-        normalization: new MixedSchema(),
+        validation: new UnionType(
+            new FunctionType(),
+            new ObjectType({
+                type: RegExp,
+            }),
+        ),
+        normalization: new FunctionType(),
     },
 });
 
@@ -71,6 +81,7 @@ const patchSourceSchema = new ObjectType({
     properties: {
         type: new StringType({enumeration: ['input', 'provided']}),
     },
+    additionalProperties: true,
     subtypes: {
         discriminator: 'type',
         schemas: {
@@ -81,7 +92,7 @@ const patchSourceSchema = new ObjectType({
 });
 
 const patchActionDefinitionSchema = new ObjectType({
-    required: ['event'],
+    required: ['subject', 'attribute', 'operation', 'source'],
     properties: {
         subject: new StringType({
             enumeration: ['user', 'session'],
@@ -101,7 +112,7 @@ const actionDefinitionSchema = new ObjectType({
     additionalProperties: true,
     properties: {
         type: new StringType({
-            enumeration: ['custom', 'tracking', 'operation', 'css'],
+            enumeration: ['custom', 'tracking', 'patch', 'style'],
         }),
     },
     subtypes: {
