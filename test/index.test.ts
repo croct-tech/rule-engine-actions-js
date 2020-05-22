@@ -367,7 +367,7 @@ describe('An action extension installer', () => {
                     },
                 },
             },
-            "Unexpected value at path '/fooAction/action/source/type', expecting 'input' or 'provided', found 'foo'.",
+            "Unexpected value at path '/fooAction/action/source/type', expecting 'element' or 'provided', found 'foo'.",
         ],
         [
             {
