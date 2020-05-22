@@ -2,8 +2,8 @@ import {PluginSdk} from '@croct/plug/plugin';
 import {JsonValue} from '@croct/plug/sdk/json';
 import {Action} from './index';
 
-type InputSource = {
-    type: 'input',
+type ElementSource = {
+    type: 'element',
     element: string,
     validation?: {(value: string): boolean} | RegExp,
     normalization?: {(value: string): JsonValue},
@@ -18,7 +18,7 @@ export type PatchDefinition = {
     subject: 'user' | 'session',
     attribute: string,
     operation: 'set' | 'add' | 'combine',
-    source: ProvidedSource | InputSource,
+    source: ProvidedSource | ElementSource,
 }
 
 export default class PatchAction implements Action {
@@ -63,7 +63,7 @@ export default class PatchAction implements Action {
             case 'provided':
                 return source.value;
 
-            case 'input': {
+            case 'element': {
                 const element = document.querySelector(source.element);
 
                 if (element === null) {
@@ -110,6 +110,6 @@ export default class PatchAction implements Action {
             return element.value;
         }
 
-        return null;
+        return element.textContent;
     }
 }

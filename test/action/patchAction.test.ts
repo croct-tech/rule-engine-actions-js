@@ -12,7 +12,7 @@ describe('A patch action', () => {
         ['set'],
         ['add'],
         ['combine'],
-    ])('should %s an attribute to user with a provided value', async (operation: 'set' | 'add' | 'combine') => {
+    ])('should %s a user attribute to the provided value', async (operation: 'set' | 'add' | 'combine') => {
         const sdk = createPluginSdkMock();
 
         const patch: any = {
@@ -49,7 +49,7 @@ describe('A patch action', () => {
         ['set'],
         ['add'],
         ['combine'],
-    ])('should %s an attribute to session with a provided value', async (operation: 'set' | 'add' | 'combine') => {
+    ])('should %s a session attribute to the provided value', async (operation: 'set' | 'add' | 'combine') => {
         const sdk = createPluginSdkMock();
 
         const patch: any = {
@@ -82,7 +82,43 @@ describe('A patch action', () => {
         expect(patch.save).toHaveBeenCalled();
     });
 
-    test('should set an attribute with a value of an input validated by a function', async () => {
+    test('should capture attribute values from input fields', async () => {
+        const input = document.createElement('input');
+        input.value = 'enterprise';
+        input.classList.add('example');
+
+        document.body.appendChild(input);
+
+        const sdk = createPluginSdkMock();
+        const patch: any = {
+            set: jest.fn().mockImplementation(() => patch),
+            save: jest.fn().mockReturnValue(Promise.resolve()),
+        };
+
+        Object.defineProperty(sdk.user, 'edit', {
+            value: jest.fn().mockReturnValue(patch),
+        });
+
+        const definition: PatchDefinition = {
+            subject: 'user',
+            attribute: 'plan',
+            operation: 'set',
+            source: {
+                type: 'element',
+                element: '.example',
+            },
+        };
+
+        const action = new PatchAction(definition);
+
+        await action.apply(sdk);
+
+        expect(sdk.user.edit).toHaveBeenCalled();
+        expect(patch.set).toHaveBeenCalledWith('plan', 'enterprise');
+        expect(patch.save).toHaveBeenCalled();
+    });
+
+    test('should normalize the attribute value using the specified normalizer', async () => {
         const input = document.createElement('input');
         input.value = 'enterprise';
         input.classList.add('example');
@@ -100,16 +136,16 @@ describe('A patch action', () => {
         });
 
         const validation = jest.fn().mockReturnValue(true);
-        const normalization = jest.fn().mockReturnValue('Enterprise');
+
         const definition: PatchDefinition = {
             subject: 'user',
             attribute: 'plan',
             operation: 'set',
             source: {
-                type: 'input',
+                type: 'element',
                 element: '.example',
                 validation: validation,
-                normalization: normalization,
+                normalization: jest.fn().mockReturnValue('Enterprise'),
             },
         };
 
@@ -117,13 +153,14 @@ describe('A patch action', () => {
 
         await action.apply(sdk);
 
+        expect(validation).toHaveBeenCalledWith('enterprise');
+
         expect(sdk.user.edit).toHaveBeenCalled();
         expect(patch.set).toHaveBeenCalledWith('plan', 'Enterprise');
         expect(patch.save).toHaveBeenCalled();
-        expect(validation).toHaveBeenCalledBefore(normalization);
     });
 
-    test('should not set an attribute with a value of a password input', async () => {
+    test('should not capture attribute values from password fields', async () => {
         const input = document.createElement('input');
         input.type = 'password';
         input.classList.add('example');
@@ -145,7 +182,7 @@ describe('A patch action', () => {
             attribute: 'plan',
             operation: 'set',
             source: {
-                type: 'input',
+                type: 'element',
                 element: '.example',
             },
         };
@@ -154,10 +191,10 @@ describe('A patch action', () => {
 
         await action.apply(sdk);
 
-        expect(patch.save).not.toHaveBeenCalled();
+        expect(sdk.user.edit).not.toHaveBeenCalled();
     });
 
-    test('should not set an attribute with a value of an input if it does not match the given regex', async () => {
+    test('should only capture attributes if the input value satisfies the specified validation', async () => {
         const input = document.createElement('input');
         input.value = 'enterprise';
         input.classList.add('example');
@@ -174,25 +211,90 @@ describe('A patch action', () => {
             value: jest.fn().mockReturnValue(patch),
         });
 
-        const definition: PatchDefinition = {
+        const nonMatchingAction = new PatchAction({
             subject: 'user',
             attribute: 'plan',
             operation: 'set',
             source: {
-                type: 'input',
+                type: 'element',
                 element: '.example',
-                validation: /[0-9][a-z]+/,
+                validation: (): boolean => false,
             },
-        };
+        });
 
-        const action = new PatchAction(definition);
-
-        await action.apply(sdk);
+        await nonMatchingAction.apply(sdk);
 
         expect(patch.save).not.toHaveBeenCalled();
+
+        const matchingAction = new PatchAction({
+            subject: 'user',
+            attribute: 'plan',
+            operation: 'set',
+            source: {
+                type: 'element',
+                element: '.example',
+                validation: (): boolean => true,
+            },
+        });
+
+        await matchingAction.apply(sdk);
+
+        expect(sdk.user.edit).toHaveBeenCalled();
+        expect(patch.set).toHaveBeenCalledWith('plan', 'enterprise');
+        expect(patch.save).toHaveBeenCalled();
     });
 
-    test('should set an attribute with a value of a selection', async () => {
+    test('should only capture attributes if the input value matches the specified regex', async () => {
+        const input = document.createElement('input');
+        input.value = 'enterprise';
+        input.classList.add('example');
+
+        document.body.appendChild(input);
+
+        const sdk = createPluginSdkMock();
+        const patch: any = {
+            set: jest.fn().mockImplementation(() => patch),
+            save: jest.fn().mockReturnValue(Promise.resolve()),
+        };
+
+        Object.defineProperty(sdk.user, 'edit', {
+            value: jest.fn().mockReturnValue(patch),
+        });
+
+        const nonMatchingAction = new PatchAction({
+            subject: 'user',
+            attribute: 'plan',
+            operation: 'set',
+            source: {
+                type: 'element',
+                element: '.example',
+                validation: /startup/,
+            },
+        });
+
+        await nonMatchingAction.apply(sdk);
+
+        expect(patch.save).not.toHaveBeenCalled();
+
+        const matchingAction = new PatchAction({
+            subject: 'user',
+            attribute: 'plan',
+            operation: 'set',
+            source: {
+                type: 'element',
+                element: '.example',
+                validation: /enterprise/,
+            },
+        });
+
+        await matchingAction.apply(sdk);
+
+        expect(sdk.user.edit).toHaveBeenCalled();
+        expect(patch.set).toHaveBeenCalledWith('plan', 'enterprise');
+        expect(patch.save).toHaveBeenCalled();
+    });
+
+    test('should capture attribute values from select fields', async () => {
         const option = document.createElement('option');
         option.value = 'enterprise';
 
@@ -217,7 +319,7 @@ describe('A patch action', () => {
             attribute: 'plan',
             operation: 'set',
             source: {
-                type: 'input',
+                type: 'element',
                 element: '.example',
             },
         };
@@ -231,7 +333,7 @@ describe('A patch action', () => {
         expect(patch.save).toHaveBeenCalled();
     });
 
-    test('should set an attribute with a value of a text area', async () => {
+    test('should capture attribute values from textarea fields', async () => {
         const textArea = document.createElement('textarea');
         textArea.value = 'enterprise';
         textArea.classList.add('example');
@@ -253,7 +355,7 @@ describe('A patch action', () => {
             attribute: 'plan',
             operation: 'set',
             source: {
-                type: 'input',
+                type: 'element',
                 element: '.example',
             },
         };
@@ -267,8 +369,9 @@ describe('A patch action', () => {
         expect(patch.save).toHaveBeenCalled();
     });
 
-    test('should not set an attribute with a value of another element types', async () => {
+    test('should capture attribute values from the content of non-form fields', async () => {
         const div = document.createElement('div');
+        div.textContent = 'enterprise';
         div.classList.add('example');
 
         document.body.appendChild(div);
@@ -288,7 +391,7 @@ describe('A patch action', () => {
             attribute: 'plan',
             operation: 'set',
             source: {
-                type: 'input',
+                type: 'element',
                 element: '.example',
             },
         };
@@ -297,10 +400,12 @@ describe('A patch action', () => {
 
         await action.apply(sdk);
 
-        expect(patch.save).not.toHaveBeenCalled();
+        expect(sdk.user.edit).toHaveBeenCalled();
+        expect(patch.set).toHaveBeenCalledWith('plan', 'enterprise');
+        expect(patch.save).toHaveBeenCalled();
     });
 
-    test('should not set an attribute with a value of an element that does not exist', async () => {
+    test('should not fail if an element does not exist', async () => {
         const sdk = createPluginSdkMock();
         const patch: any = {
             set: jest.fn().mockImplementation(() => patch),
@@ -316,8 +421,8 @@ describe('A patch action', () => {
             attribute: 'plan',
             operation: 'set',
             source: {
-                type: 'input',
-                element: '.example',
+                type: 'element',
+                element: '.non-existent-element',
             },
         };
 

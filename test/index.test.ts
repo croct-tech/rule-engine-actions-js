@@ -396,7 +396,7 @@ describe('An action extension installer', () => {
                         attribute: 'plan',
                         operation: 'combine',
                         source: {
-                            type: 'input',
+                            type: 'element',
                         },
                     },
                 },
@@ -413,7 +413,7 @@ describe('An action extension installer', () => {
                         attribute: 'plan',
                         operation: 'combine',
                         source: {
-                            type: 'input',
+                            type: 'element',
                             element: 1,
                         },
                     },
@@ -431,7 +431,7 @@ describe('An action extension installer', () => {
                         attribute: 'plan',
                         operation: 'combine',
                         source: {
-                            type: 'input',
+                            type: 'element',
                             element: 'planInput',
                             validation: 1,
                         },
@@ -450,7 +450,7 @@ describe('An action extension installer', () => {
                         attribute: 'plan',
                         operation: 'combine',
                         source: {
-                            type: 'input',
+                            type: 'element',
                             element: 'planInput',
                             normalization: 1,
                         },
@@ -670,7 +670,7 @@ describe('An action extension installer', () => {
                     attribute: 'plan',
                     operation: 'combine',
                     source: {
-                        type: 'input',
+                        type: 'element',
                         element: 'planInput',
                     },
                 },
@@ -685,7 +685,7 @@ describe('An action extension installer', () => {
                     attribute: 'plan',
                     operation: 'combine',
                     source: {
-                        type: 'input',
+                        type: 'element',
                         element: 'planInput',
                         validation: /[a-z]+/,
                         normalization: jest.fn(),
@@ -702,7 +702,7 @@ describe('An action extension installer', () => {
                     attribute: 'plan',
                     operation: 'combine',
                     source: {
-                        type: 'input',
+                        type: 'element',
                         element: 'planInput',
                         validation: jest.fn(),
                     },

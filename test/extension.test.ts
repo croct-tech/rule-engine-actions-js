@@ -253,7 +253,7 @@ describe('An action trigger extension', () => {
         expect(action.apply).toHaveBeenCalledWith(sdk);
     });
 
-    test('should do nothing if action definition is undefined', async () => {
+    test('should do nothing if no action is specified', async () => {
         const action = jest.fn();
         const actionCondition: ActionCondition = {
             trigger: {
@@ -304,7 +304,7 @@ describe('An action trigger extension', () => {
         );
     });
 
-    test('should log an error message if action is not registered', async () => {
+    test('should log an error message if the action is not registered', async () => {
         const actionCondition: ActionCondition = {
             trigger: {
                 type: 'match',

@@ -5,30 +5,61 @@ import {Action} from '../../src/action';
 
 beforeEach(() => {
     jest.restoreAllMocks();
-    document.body = document.createElement('body');
 });
 
 describe('A custom action', () => {
-    test('should apply all given actions', async () => {
-        const firstAction = {apply: jest.fn()};
-        const secondAction = jest.fn();
-        const thirdAction = {apply: (): Promise<void> => Promise.resolve()};
-        const fourthAction = (): Promise<void> => Promise.resolve();
+    test('should apply all specified actions', async () => {
+        let resolveFirst: {(): void} = jest.fn();
+        const firstAction = {
+            apply: jest.fn().mockReturnValue(new Promise<void>(resolve => {
+                resolveFirst = resolve;
+            })),
+        };
+
+        let resolveSecond: {(): void} = jest.fn();
+        const secondAction = jest.fn().mockReturnValue(new Promise<void>(resolve => {
+            resolveSecond = resolve;
+        }));
+
+        const thirdAction = {apply: jest.fn()};
+        const fourthAction = jest.fn();
+
         const sdk = createPluginSdkMock();
 
         jest.spyOn(thirdAction, 'apply');
 
         const action = new CustomAction([firstAction, secondAction, thirdAction, fourthAction]);
 
-        await action.apply(sdk);
+        const done = jest.fn();
+        const promise = action.apply(sdk).then(done);
+
+        await new Promise(resolve => window.setTimeout(resolve, 10));
+
+        expect(done).not.toHaveBeenCalled();
 
         expect(firstAction.apply).toHaveBeenCalled();
         expect(secondAction).toHaveBeenCalled();
         expect(thirdAction.apply).toHaveBeenCalled();
-        expect(firstAction.apply).toHaveBeenCalledBefore(secondAction);
+        expect(fourthAction).toHaveBeenCalled();
+
+        expect(firstAction.apply).toHaveBeenCalledBefore(secondAction as jest.Mock);
+        expect(secondAction).toHaveBeenCalledBefore(thirdAction.apply as jest.Mock);
+        expect(thirdAction.apply).toHaveBeenCalledBefore(fourthAction);
+
+        resolveFirst();
+
+        await new Promise(resolve => window.setTimeout(resolve, 10));
+
+        expect(done).not.toHaveBeenCalled();
+
+        resolveSecond();
+
+        await promise;
+
+        expect(done).toHaveBeenCalled();
     });
 
-    test('should remove a class from a given element', async () => {
+    test('should log an error if an action is invalid', async () => {
         const sdk = createPluginSdkMock();
         const logger = sdk.getLogger();
 

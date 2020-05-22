@@ -7,7 +7,7 @@ beforeEach(() => {
 });
 
 describe('A tracking action', () => {
-    test('should track an event', async () => {
+    test('should track events', async () => {
         const sdk = createPluginSdkMock();
 
         sdk.tracker.track = jest.fn().mockResolvedValue(undefined);
@@ -15,7 +15,7 @@ describe('A tracking action', () => {
         const event: ExternalEvent = {
             type: 'goalCompleted',
             goalId: 'foo',
-        }
+        };
 
         const action = new TrackingAction(event);
 

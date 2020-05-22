@@ -62,7 +62,7 @@ const providedSourceSchema = new ObjectType({
     },
 });
 
-const inputSourceSchema = new ObjectType({
+const elementSourceSchema = new ObjectType({
     required: ['element'],
     properties: {
         element: new StringType({minLength: 1}),
@@ -79,14 +79,14 @@ const inputSourceSchema = new ObjectType({
 const patchSourceSchema = new ObjectType({
     required: ['type'],
     properties: {
-        type: new StringType({enumeration: ['input', 'provided']}),
+        type: new StringType({enumeration: ['element', 'provided']}),
     },
     additionalProperties: true,
     subtypes: {
         discriminator: 'type',
         schemas: {
             provided: providedSourceSchema,
-            input: inputSourceSchema,
+            element: elementSourceSchema,
         },
     },
 });
