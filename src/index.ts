@@ -5,7 +5,7 @@ import {actionMapSchema} from './schema';
 
 declare module '@croct/plug-rule-engine/plugin' {
     export interface ExtensionConfigurations {
-        actions?: ActionMap;
+        actions?: ActionMap | false;
     }
 }
 
