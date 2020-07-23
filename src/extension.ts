@@ -12,20 +12,20 @@ import {Action} from './action';
 export type CustomActionDefinition = {
     type: 'custom',
     handler: ActionHandler | ActionHandler[],
-}
+};
 
 export type TrackingActionDefinition = {
     type: 'tracking',
     event: ExternalEvent,
-}
+};
 
 export type PatchActionDefinition = PatchDefinition & {
     type: 'patch',
-}
+};
 
 export type StyleActionDefinition = StyleDefinition & {
     type: 'style',
-}
+};
 
 export type ActionDefinition =
     CustomActionDefinition
@@ -37,18 +37,18 @@ type EventTrigger = {
     type: 'event',
     element: string,
     event: keyof HTMLElementEventMap,
-}
+};
 
 type MatchTrigger = {
     type: 'match',
-}
+};
 
 export type ActionTrigger = MatchTrigger | EventTrigger;
 
 export type ActionCondition = {
     trigger: ActionTrigger,
     action: ActionDefinition,
-}
+};
 
 export type ActionProperty = string|string[];
 
@@ -113,7 +113,7 @@ export default class ActionExtension implements Extension {
 
             case 'event':
                 window.document.querySelectorAll(trigger.element).forEach(element => {
-                    element.addEventListener(trigger.event, () => action.apply(this.sdk))
+                    element.addEventListener(trigger.event, () => action.apply(this.sdk));
                 });
                 break;
         }
