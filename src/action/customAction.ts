@@ -44,6 +44,6 @@ export default class CustomAction implements Action {
 
         return Promise.all(pending).then(() => {
             // omit values
-        })
+        });
     }
 }

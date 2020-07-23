@@ -7,19 +7,19 @@ type ElementSource = {
     element: string,
     validation?: {(value: string): boolean} | RegExp,
     normalization?: {(value: string): JsonValue},
-}
+};
 
 type ProvidedSource = {
     type: 'provided',
     value: JsonValue,
-}
+};
 
 export type PatchDefinition = {
     subject: 'user' | 'session',
     attribute: string,
     operation: 'set' | 'add' | 'combine',
     source: ProvidedSource | ElementSource,
-}
+};
 
 export default class PatchAction implements Action {
     private readonly definition: PatchDefinition;
