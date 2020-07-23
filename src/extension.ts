@@ -1,6 +1,6 @@
 import {PluginSdk} from '@croct/plug/plugin';
 import {describe} from '@croct/plug/sdk/validation';
-import {ExternalEvent} from '@croct/plug/sdk/event';
+import {ExternalTrackingEvent} from '@croct/plug/sdk/tracking';
 import {Extension} from '@croct/plug-rule-engine/extension';
 import {Rule} from '@croct/plug-rule-engine/rule';
 import CustomAction, {ActionHandler} from './action/customAction';
@@ -16,7 +16,7 @@ export type CustomActionDefinition = {
 
 export type TrackingActionDefinition = {
     type: 'tracking',
-    event: ExternalEvent,
+    event: ExternalTrackingEvent,
 };
 
 export type PatchActionDefinition = PatchDefinition & {

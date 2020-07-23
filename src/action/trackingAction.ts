@@ -1,11 +1,11 @@
-import {ExternalEvent} from '@croct/plug/sdk/event';
+import {ExternalTrackingEvent} from '@croct/plug/sdk/tracking';
 import {PluginSdk} from '@croct/plug/plugin';
 import {Action} from './index';
 
 export default class TrackingAction implements Action {
-    private readonly event: ExternalEvent;
+    private readonly event: ExternalTrackingEvent;
 
-    public constructor(event: ExternalEvent) {
+    public constructor(event: ExternalTrackingEvent) {
         this.event = event;
     }
 
